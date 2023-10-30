@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fmt::Display, str::FromStr};
+use std::{borrow::Cow, str::FromStr};
 
 /// Specific location of tokens
 /// ```text
@@ -32,7 +32,7 @@ pub trait Parse: Sized {
 
 impl<S: FromStr> Parse for S
 where
-    S::Err: Display,
+    S::Err: 'static + std::error::Error,
 {
     fn parse<T: Input>(input: T) -> Result<(T, Self), Error> {
         let mut tokens = input.tokens();
@@ -52,7 +52,7 @@ where
             }
             Err(e) => Err(Error::InvalidValue {
                 span: (start).into(),
-                description: Cow::Owned(format!("{}", e)),
+                inner: Box::new(e),
             }),
         }
     }
@@ -101,7 +101,7 @@ pub enum Error {
     },
     InvalidValue {
         span: Span,
-        description: Cow<'static, str>,
+        inner: Box<dyn std::error::Error>,
     },
     UnexpectedEndOfInput {
         span: Span,

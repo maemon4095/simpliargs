@@ -1,29 +1,24 @@
+mod syntax;
 use proc_macro2::TokenStream;
 
-pub fn simpliargs(attr: TokenStream, body: TokenStream) -> TokenStream {
-    let item_struct: syn::ItemStruct = match syn::parse2(body) {
-        Ok(e) => e,
-        Err(e) => return e.to_compile_error(),
-    };
-
-    todo!()
-}
-
 /// ```
-/// #[simpliargs(defaults = [single, optional, option])]
+/// #[simpliargs(help("-h", "--help"), defaults(single, optional, flag))]
 /// struct Args {
 ///     /// required option with single value
-///     #[required, option("--single", "-s")]
-///     option: usize, // field types must be implement Parse
+///     #[required, flag("--single", "-s")]
+///     option: usize, // field types must be implement simpliargs::Parse
+///
 ///     /// required positional argument
 ///     #[positional(0)]
 ///     positional: String,
+///
 ///     /// optional option with multiple values
 ///     /// multiple option require "FromIterator" implementation.
-///     #[multiple, option]
+///     #[multiple, flag]
 ///     multiple: Vec<String> // --multiple
+///
 ///     /// optional option without default attribute require "Default" implementation
-///     #[option("--optional")]    
+///     #[flag("--optional")]
 ///     optional: Option<String>
 ///
 ///     /// explicit optional
@@ -36,22 +31,43 @@ pub fn simpliargs(attr: TokenStream, body: TokenStream) -> TokenStream {
 ///
 ///     default_field: String // --default_field
 ///
+///     /// subcommand
+///     #[flag("sub")]
+///     subcommand: Option<ArgsWithSubcommand>,
+///
 ///     #[multiple, positional]
 ///     rest_arguments: Vec<String>
 /// }
 ///
-/// #[simpliargs]
+/// #[simpliargs(nohelp)]
 /// enum ArgsWithSubcommand {
-///     #[simpliargs]
+///     #[flag, simpliargs]
 ///     Choice0 {
 ///         /// struct like enum member is same for struct
 ///     },
-///     #[subcommand("c")]
+///     #[flag("c")]
 ///     Choice1(A),
 ///     Choice2 // choice2
 /// }
 /// ```
-enum GenerationOptions {
-    Subcommand,
-    Option,
+pub fn simpliargs(attr: TokenStream, body: TokenStream) -> TokenStream {
+    let _err_not_struct = match syn::parse2(body.clone()) {
+        Ok(e) => return gen_struct(e),
+        Err(e) => e,
+    };
+
+    let _err_not_enum = match syn::parse2(body.clone()) {
+        Ok(e) => return gen_enum(e),
+        Err(e) => e,
+    };
+
+    syn::Error::new_spanned(body, "simpliargs only supports struct or enum.").into_compile_error()
+}
+
+fn gen_struct(item_struct: syn::ItemStruct) -> TokenStream {
+    todo!()
+}
+
+fn gen_enum(item_enum: syn::ItemEnum) -> TokenStream {
+    todo!()
 }
