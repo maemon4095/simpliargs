@@ -5,8 +5,12 @@ use std::{borrow::Cow, str::FromStr};
 /// Ex) The Location points below
 ///             ↓
 /// $ bin.exe args bbb ccc
-///           │ └ offset_in_token: count of bytes before the character. In this example, it will be 2 == 'a'.len_utf8() + 'r'.len_utf8()
-///           └───── token_offset: count of tokens before the token. In this example, token "args" is first argument and it will be 0
+///           │ └ offset_in_token: count of bytes before the character.
+///           └───── token_offset: count of tokens before the token.
+///
+/// In the example above,
+///     offset_in_token == 2 because "ar".len() == 2.
+///     token_offset == 0 because no tokens before the token "args".
 /// ```
 pub struct Location {
     /// count of bytes before the character.
